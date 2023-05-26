@@ -4,5 +4,6 @@ This project detects 80 types of objects with the help of YOLO pre trained model
 # yolo
 YOLO v3 Object Detection with Voice Feedback using gTTS
 
+
 Download the yolov3 weights from
 https://pjreddie.com/media/files/yolov3.weights
