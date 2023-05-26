@@ -4,6 +4,7 @@ from gtts import gTTS
 import IPython.display as ipd
 import subprocess
 import os
+import time
 
 # Distance constants 
 KNOWN_DISTANCE = 45 #INCHES
@@ -62,14 +63,16 @@ def object_detector(image):
         # returning list containing the object data. 
     return data_list, text
 
+
 def focal_length_finder (measured_distance, real_width, width_in_rf):
     focal_length = (width_in_rf * measured_distance) / real_width
     return focal_length
 
 # distance finder function 
-def distance_finder(focal_length, real_object_width, width_in_frmae):
-    distance = (real_object_width * focal_length) / width_in_frmae
+def distance_finder(focal_length, real_object_width, width_in_frame):
+    distance = (real_object_width * focal_length) / width_in_frame
     return distance
+
 
 # reading the reference image from dir 
 ref_person = cv.imread('ReferenceImages/image14.png')
@@ -87,10 +90,11 @@ print(f"Person width in pixels : {person_width_in_rf} mobile width in pixel: {mo
 focal_person = focal_length_finder(KNOWN_DISTANCE, PERSON_WIDTH, person_width_in_rf)
 focal_mobile = focal_length_finder(KNOWN_DISTANCE, MOBILE_WIDTH, mobile_width_in_rf)
 
+
 cap = cv.VideoCapture(0)
 while True:
     ret, frame = cap.read()
-
+    #cv.imshow('frame',frame)
     data, text = object_detector(frame) 
     for d in data:
         if d[0] =='person':
@@ -101,16 +105,18 @@ while True:
             x, y = d[2]
         cv.rectangle(frame, (x, y-3), (x+150, y+23),BLACK,-1 )
         cv.putText(frame, f'Dis: {round(distance,2)} inch', (x+5,y+13), FONTS, 0.48, GREEN, 2)
-        
+
+    cv.imshow('frame',frame)
+
     if text:
-        description = ', '.join(text)
+        description = f"{text} is at {round(distance,2)} inches far"
         tts = gTTS(description, lang='en')
         tts.save('tts.mp3')
         ipd.Audio('tts.mp3')
         #tts = AudioSegment.from_mp3("tts.mp3")
         subprocess.call(["ffplay", "-nodisp", "-autoexit", "tts.mp3"], shell=False)
 
-    cv.imshow('frame',frame)
+    time.sleep(0.5)
     
     key = cv.waitKey(1)
     if key ==ord('q'):
